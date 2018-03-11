@@ -1,0 +1,65 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/snapshot" }
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+
+dependencies {
+    compile name: 'commons-collections-3.2.1'
+    compile 'commons-lang:commons-lang:2.6'
+    compile name: 'commons-logging-1.2'
+    compile name: 'log4j-1.2.17'
+    compile name: 'log4j-api-2.0'
+    compile name: 'log4j-core-2.0'
+    compile("org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE")
+    compile 'junit:junit:4.12'
+}
+
+
+
+task copySrc(type: Copy){
+    from "src"
+	exclude "main/java"
+	exclude "test"
+    into "$buildDir/libs/src"
+}
+
+task copyCmd(type: Copy) {
+    from "run.bat"
+    into "$buildDir/libs"
+}
+
+task copyConfig(type: Copy) {
+    from "configs"
+    into "$buildDir/libs/configs"
+}
+
+task copyLibs(type: Copy){
+	from configurations.runtime
+    into "$buildDir/libs/lib"
+}
+
+//build đầy đủ
+task fatBuild(type: Copy, dependsOn: ["jar", "copySrc", "copyConfig", "copyCmd", "copyLibs"]) {
+	description 'Build jar, copy web source, config and run bath file'
+}
+
+//build bản nhẹ chỉ có src
+task("litBuild", type: Copy, dependsOn: "copySrc") {
+	description 'Copy web source'
+    from configurations.runtime
+    into "$buildDir/libs/lib"
+}
+
+
